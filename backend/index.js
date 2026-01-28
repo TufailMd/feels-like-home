@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://feelslikehome-rose.vercel.app",
+  "https://feelslikehome-one.vercel.app",
 ];
 
 app.use(
