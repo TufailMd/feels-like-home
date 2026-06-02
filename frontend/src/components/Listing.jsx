@@ -65,7 +65,12 @@ function Listing() {
         };
     }, [currListing]);
 
-    const isOwner = user?._id === currListing?.owner[0]?._id;
+    // const isOwner = user?._id === currListing?.owner[0]?._id;
+    const isOwner =
+        user?._id &&
+        currListing?.owner &&
+        currListing.owner.length > 0 &&
+        currListing.owner[0]._id === user._id;
 
     const handleSubmitReview = async (e) => {
         e.preventDefault();
@@ -97,6 +102,20 @@ function Listing() {
         }
 
     };
+
+    const handleModificationRequest = (path) => {
+        if (!user?._id) {
+            navigate("/login");
+            return;
+        }
+
+        if (!isOwner) {
+            alert("You are not the owner");
+            return;
+        }
+
+        navigate(path);
+    }
 
     return (
         <>
@@ -153,18 +172,18 @@ function Listing() {
                         <p className="mb-3">{currListing.country}</p>
                     </div>
 
-                    {isOwner && (
+                    {!authLoading && isOwner && (
                         <div className="my-4 mb-6">
                             <button
                                 className="px-5 py-2 bg-blue-500 text-white rounded-lg mr-4 hover:bg-blue-600 cursor-pointer"
-                                onClick={() => navigate(`/listings/${currListing._id}/edit`)}
+                                onClick={() => handleModificationRequest(`/listings/${currListing._id}/edit`)}
                             >
                                 Edit
                             </button>
 
                             <button
                                 className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
-                                onClick={() => navigate(`/listings/${currListing._id}/delete`)}
+                                onClick={() => handleModificationRequest(`/listings/${currListing._id}/delete`)}
                             >
                                 Delete
                             </button>
