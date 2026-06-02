@@ -18,7 +18,7 @@ function Signup() {
     const onSubmit = async (data) => {
         console.log(data);
         try {
-            dispatch(signup(data)).unwrap();
+            await dispatch(signup(data)).unwrap();
             reset();
             navigate("/")
         } catch (err) {

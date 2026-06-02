@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { login } from "../../features/user/userThunks";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
     const {
@@ -14,13 +14,13 @@ function Login() {
     const navigate = useNavigate();
 
     const onSubmit = async (data) => {
-        console.log("Login Data:", data);
         try {
-            dispatch(login(data)).unwrap();
-            reset("");
+            await dispatch(login(data)).unwrap();
+            reset();
             navigate("/");
         } catch (error) {
             console.log(error);
+            alert("Login failed");
         }
     };
 
@@ -88,12 +88,12 @@ function Login() {
 
                 <p className="text-center text-gray-600">
                     Don&apos;t have an account?{" "}
-                    <a
-                        href="/user/signup"
+                    <Link
+                        to="/signup"
                         className="text-blue-600 hover:underline font-medium"
                     >
                         Sign up
-                    </a>
+                    </Link>
                 </p>
             </div>
         </div>
