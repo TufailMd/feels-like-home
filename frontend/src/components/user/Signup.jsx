@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 function Signup() {
     const [message, setMessage] = useState(null);
     const [type, setType] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
 
     const dispatch = useDispatch();
     const {
@@ -28,19 +30,15 @@ function Signup() {
             setMessage("Signup successful! Redirecting...");
 
             setTimeout(() => {
-                navigate("/login");
+                navigate("/user/login");
             }, 1500);
-            setTimeout(() => {
-                setMessage(null);
-            }, 3000);
         } catch (err) {
             console.log(err);
 
             setType("error");
             setMessage(err?.response?.data?.error || "Signup failed");
-            setTimeout(() => {
-                setMessage(null);
-            }, 3000);
+        } finally {
+            setIsLoading(false); // Re-enable button
         }
 
     };
@@ -57,7 +55,7 @@ function Signup() {
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: -10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            // exit={{ opacity: 0, scale: 0.95, y: -10 }}
                             transition={{ duration: 0.3 }}
                             className={`mb-4 px-4 py-2 rounded-lg text-sm font-medium
                             ${type === "success"
@@ -158,10 +156,13 @@ function Signup() {
                     {/* Button */}
                     <button
                         type="submit"
-                        className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium cursor-pointer"
+                        disabled={isLoading}
+                        className={`w-full text-white py-2 rounded-lg transition font-medium 
+                        ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 cursor-pointer'}`}
                     >
-                        Sign up
+                        {isLoading ? 'Signing up...' : 'Sign up'}
                     </button>
+
                 </form>
 
                 <hr className="my-4" />
@@ -169,7 +170,7 @@ function Signup() {
                 <p className="text-center text-gray-600">
                     Have an account?{" "}
                     <Link
-                        to="/login"
+                        to="/user/login"
                         className="text-blue-600 hover:underline font-medium"
                     >
                         Log in

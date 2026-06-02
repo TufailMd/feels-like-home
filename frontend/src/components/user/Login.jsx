@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 function Login() {
     const [message, setMessage] = useState(null);
     const [type, setType] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
     const {
         register,
         handleSubmit, reset,
@@ -19,6 +21,7 @@ function Login() {
 
     const onSubmit = async (data) => {
         try {
+            setIsLoading(true);
             await dispatch(login(data)).unwrap();
             reset();
 
@@ -28,18 +31,15 @@ function Login() {
             setTimeout(() => {
                 navigate("/");
             }, 1000);
-            setTimeout(() => {
-                setMessage(null);
-            }, 3000);
 
         } catch (error) {
             console.log(error);
 
             setType("error");
             setMessage(error?.response?.data?.error || "Login failed");
-            setTimeout(() => {
-                setMessage(null);
-            }, 3000);
+
+        } finally {
+            setIsLoading(false);
         }
 
     };
@@ -53,7 +53,7 @@ function Login() {
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: -10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            // exit={{ opacity: 0, scale: 0.95, y: -10 }}
                             transition={{ duration: 0.3 }}
                             className={`mb-4 px-4 py-2 rounded-lg text-sm font-medium
                             ${type === "success"
@@ -114,9 +114,11 @@ function Login() {
 
                     <button
                         type="submit"
-                        className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium cursor-pointer"
+                        disabled={isLoading}
+                        className={`w-full text-white py-2 rounded-lg transition font-medium 
+        ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 cursor-pointer'}`}
                     >
-                        Log in
+                        {isLoading ? 'Logging in...' : 'Log in'}
                     </button>
                 </form>
 

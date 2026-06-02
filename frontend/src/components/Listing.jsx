@@ -13,6 +13,9 @@ import PageLoader from "./utils/PageLoader";
 mapboxgl.accessToken = import.meta.env.VITE_MAP_TOKEN;
 
 function Listing() {
+    const [message, setMessage] = useState(null);
+    const [type, setType] = useState(""); // success / error
+
     const { currListing, loading, error } = useSelector(state => state.listings);
     const { user, loading: authLoading } = useSelector(state => state.auth);
     const { loading: reviewLoading } = useSelector(state => state.reviews);
@@ -29,89 +32,92 @@ function Listing() {
     useEffect(() => {
         dispatch(resetCurrListing());
         dispatch(getListing(id));
-    }, []);
-
+    }, [id, dispatch]);
 
     useEffect(() => {
-        if (
-            !currListing ||
-            !currListing.geometry ||
-            !mapContainerRef.current ||
-            mapRef.current
-        ) return;
+        if (!currListing || !currListing.geometry || !mapContainerRef.current || mapRef.current) return;
 
-        const [lng, lat] = currListing.geometry.coordinates;
+        try {
+            const [lng, lat] = currListing.geometry.coordinates;
 
-        const map = new mapboxgl.Map({
-            container: mapContainerRef.current,
-            style: "mapbox://styles/mapbox/streets-v12",
-            center: [lng, lat],
-            zoom: 10
-        });
+            if (typeof lng !== 'number' || typeof lat !== 'number') {
+                throw new Error("Invalid coordinates");
+            }
 
-        mapRef.current = map;
+            const map = new mapboxgl.Map({
+                container: mapContainerRef.current,
+                style: "mapbox://styles/mapbox/streets-v12",
+                center: [lng, lat],
+                zoom: 10
+            });
 
-        map.on("load", () => {
+            mapRef.current = map;
+
+            map.on("load", () => {
+                setMapLoaded(true);
+            });
+
+            new mapboxgl.Marker()
+                .setLngLat([lng, lat])
+                .addTo(map);
+
+            return () => {
+                map.remove();
+                mapRef.current = null;
+            };
+
+        } catch (err) {
+            console.error("Mapbox initialization error:", err);
             setMapLoaded(true);
-        });
-
-        new mapboxgl.Marker()
-            .setLngLat([lng, lat])
-            .addTo(map);
-
-        return () => {
-            map.remove();
-            mapRef.current = null;
-        };
+        }
     }, [currListing]);
 
     const isOwner = user?._id === currListing?.owner?._id;
 
-    const handleSubmitReview = async (e) => {
-        e.preventDefault();
-
-        if (!comment.trim()) {
-            alert("Please write a comment");
-            return;
-        }
-
-        if (!rating) {
-            alert("Please give a rating");
-            return;
-        }
-
-        const review = {
-            comment,
-            rating,
-        };
-
-
-
-        try {
-            console.log("Submitting review:", review);
-            await dispatch(addReview({ id, review }));
-            setComment("");
-            setRating(0);
-        } catch (error) {
-            console.log(error);
-        }
-
-    };
-
     const handleModificationRequest = (path) => {
         if (!user?._id) {
-            alert("You need to be logged in to perform this action");
-            navigate("/user/login");
+            setType("error");
+            setMessage("Please login first");
+            setTimeout(() => setMessage(null), 3000);
+            navigate("/login");
             return;
         }
 
         if (!isOwner) {
-            alert("You are not the owner");
+            setType("error");
+            setMessage("You are not the owner of this listing");
+            setTimeout(() => setMessage(null), 3000);
             return;
         }
 
         navigate(path);
     }
+
+    const handleSubmitReview = async (e) => {
+        e.preventDefault();
+
+        if (!comment.trim() || !rating) {
+            setType("error");
+            setMessage("Please provide both rating and comment");
+            setTimeout(() => setMessage(null), 3000);
+            return;
+        }
+
+        try {
+            await dispatch(addReview({ id, review: { comment, rating } })).unwrap();
+
+            setComment("");
+            setRating(0);
+            setType("success");
+            setMessage("Review submitted successfully");
+            setTimeout(() => setMessage(null), 3000);
+        } catch (error) {
+            setType("error");
+            setMessage(error?.response?.data?.error || "Failed to submit review");
+            setTimeout(() => setMessage(null), 3000);
+        }
+    };
+
 
     return (
         <>
@@ -171,14 +177,16 @@ function Listing() {
                     {/* {isOwner && ( */}
                     <div className="my-4 mb-6">
                         <button
-                            className="px-5 py-2 bg-blue-500 text-white rounded-lg mr-4 hover:bg-blue-600 cursor-pointer"
+                            disabled={!isOwner}
+                            className="px-5 py-2 bg-blue-500 text-white rounded-lg mr-4 hover:bg-blue-600 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
                             onClick={() => handleModificationRequest(`/listings/${currListing._id}/edit`)}
                         >
                             Edit
                         </button>
 
                         <button
-                            className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
+                            disabled={!isOwner}
+                            className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
                             onClick={() => handleModificationRequest(`/listings/${currListing._id}/delete`)}
                         >
                             Delete
@@ -212,19 +220,26 @@ function Listing() {
                                         />
                                     </Box>
 
-
                                     <button
                                         disabled={deletingId === review._id}
                                         onClick={() => {
                                             setDeletingId(review._id);
                                             dispatch(deleteReview({ id, reviewId: review._id }))
-                                                .finally(() => setDeletingId(null)
-                                                );
+                                                .unwrap()
+                                                .then(() => {
+                                                    setType("success");
+                                                    setMessage("Review deleted!");
+                                                    setTimeout(() => setMessage(null), 3000);
+                                                })
+                                                .catch((err) => {
+                                                    setType("error");
+                                                    setMessage(err?.message || "Failed to delete review");
+                                                })
+                                                .finally(() => setDeletingId(null));
                                         }}
-                                        className={`mt-3 px-5 py-2 rounded-lg text-white cursor-pointer 
-    ${deletingId === review._id
-                                                ? "bg-gray-400 cursor-not-allowed"
-                                                : "bg-red-600 hover:bg-red-700"}`}
+                                        className={`mt-3 px-5 py-2 rounded-lg text-white cursor-pointer ${deletingId === review._id
+                                            ? "bg-gray-400 cursor-not-allowed"
+                                            : "bg-red-600 hover:bg-red-700"}`}
                                     >
                                         {deletingId === review._id ? "Deleting..." : "Delete"}
                                     </button>
@@ -244,7 +259,22 @@ function Listing() {
 
                         <div className="my-3">
                             <h4 className="text-center text-3xl mb-1">Leave a Review</h4>
-
+                            <AnimatePresence>
+                                {message && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        // exit={{ opacity: 0, y: -20 }}
+                                        transition={{ duration: 0.3 }}
+                                        className={`mb-4 px-4 py-2 rounded-lg text-sm font-medium ${type === "success"
+                                            ? "bg-green-100 text-green-700 border border-green-300"
+                                            : "bg-red-100 text-red-700 border border-red-300"
+                                            }`}
+                                    >
+                                        {message}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                             <form onSubmit={handleSubmitReview} className="space-y-4">
 
                                 <div className="mb-1">
