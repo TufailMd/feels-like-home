@@ -65,12 +65,7 @@ function Listing() {
         };
     }, [currListing]);
 
-    // const isOwner = user?._id === currListing?.owner[0]?._id;
-    const isOwner =
-        user?._id &&
-        currListing?.owner &&
-        currListing.owner.length > 0 &&
-        currListing.owner[0]._id === user._id;
+    const isOwner = user?._id === currListing?.owner?._id;
 
     const handleSubmitReview = async (e) => {
         e.preventDefault();
@@ -158,7 +153,7 @@ function Listing() {
                     </div>
 
                     <p className="text-xl mb-3">
-                        Owned by <span className="font-semibold">{currListing.owner[0]?.username}</span>
+                        Owned by <span className="font-semibold">{currListing.owner?.username}</span>
                     </p>
 
                     <div className="text-gray-600 text-lg">
