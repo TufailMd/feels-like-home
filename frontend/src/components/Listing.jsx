@@ -105,7 +105,8 @@ function Listing() {
 
     const handleModificationRequest = (path) => {
         if (!user?._id) {
-            navigate("/login");
+            alert("You need to be logged in to perform this action");
+            navigate("/user/login");
             return;
         }
 
