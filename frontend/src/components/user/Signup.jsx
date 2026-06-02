@@ -1,10 +1,9 @@
 import { useForm } from "react-hook-form";
-import { useDispatch } from "react-redux"
+import { useDispatch } from "react-redux";
 import { signup } from "../../features/user/userThunks";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
-
+import { motion, AnimatePresence } from "framer-motion";
 
 function Signup() {
     const [message, setMessage] = useState(null);
@@ -13,7 +12,8 @@ function Signup() {
     const dispatch = useDispatch();
     const {
         register,
-        handleSubmit, reset,
+        handleSubmit,
+        reset,
         formState: { errors },
     } = useForm();
 
@@ -30,32 +30,45 @@ function Signup() {
             setTimeout(() => {
                 navigate("/login");
             }, 1500);
+            setTimeout(() => {
+                setMessage(null);
+            }, 3000);
         } catch (err) {
             console.log(err);
 
             setType("error");
             setMessage(err?.response?.data?.error || "Signup failed");
+            setTimeout(() => {
+                setMessage(null);
+            }, 3000);
         }
-        setTimeout(() => {
-            setMessage(null);
-        }, 3000);
+
     };
 
     return (
         <div className="my-20 flex items-center justify-center px-4">
             <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6">
-                <h1 className="text-2xl font-semibold text-center mb-6">Sign Up</h1>
-                {message && (
-                    <div
-                        className={`mb-4 px-4 py-2 rounded-lg text-sm font-medium
-        ${type === "success"
-                                ? "bg-green-100 text-green-700 border border-green-300"
-                                : "bg-red-100 text-red-700 border border-red-300"
-                            }`}
-                    >
-                        {message}
-                    </div>
-                )}
+                <h1 className="text-2xl font-semibold text-center mb-6">
+                    Sign Up
+                </h1>
+
+                <AnimatePresence>
+                    {message && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                            className={`mb-4 px-4 py-2 rounded-lg text-sm font-medium
+                            ${type === "success"
+                                    ? "bg-green-100 text-green-700 border border-green-300"
+                                    : "bg-red-100 text-red-700 border border-red-300"
+                                }`}
+                        >
+                            {message}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
                     {/* Email */}
@@ -65,7 +78,7 @@ function Signup() {
                             type="email"
                             placeholder="Enter your email"
                             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2
-                ${errors.email
+                            ${errors.email
                                     ? "border-red-500 focus:ring-red-400"
                                     : "border-gray-300 focus:ring-blue-400"
                                 }`}
@@ -86,12 +99,14 @@ function Signup() {
 
                     {/* Username */}
                     <div className="mb-4">
-                        <label className="block text-gray-700 mb-1">Username</label>
+                        <label className="block text-gray-700 mb-1">
+                            Username
+                        </label>
                         <input
                             type="text"
                             placeholder="Enter unique username"
                             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2
-                ${errors.username
+                            ${errors.username
                                     ? "border-red-500 focus:ring-red-400"
                                     : "border-gray-300 focus:ring-blue-400"
                                 }`}
@@ -99,7 +114,8 @@ function Signup() {
                                 required: "Username is required",
                                 minLength: {
                                     value: 3,
-                                    message: "Username must be at least 3 characters",
+                                    message:
+                                        "Username must be at least 3 characters",
                                 },
                             })}
                         />
@@ -112,12 +128,14 @@ function Signup() {
 
                     {/* Password */}
                     <div className="mb-5">
-                        <label className="block text-gray-700 mb-1">Password</label>
+                        <label className="block text-gray-700 mb-1">
+                            Password
+                        </label>
                         <input
                             type="password"
                             placeholder="Enter strong password"
                             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2
-                ${errors.password
+                            ${errors.password
                                     ? "border-red-500 focus:ring-red-400"
                                     : "border-gray-300 focus:ring-blue-400"
                                 }`}
@@ -125,7 +143,8 @@ function Signup() {
                                 required: "Password is required",
                                 minLength: {
                                     value: 6,
-                                    message: "Password must be at least 6 characters",
+                                    message:
+                                        "Password must be at least 6 characters",
                                 },
                             })}
                         />
@@ -139,7 +158,7 @@ function Signup() {
                     {/* Button */}
                     <button
                         type="submit"
-                        className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium hover:cursor-pointer"
+                        className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium cursor-pointer"
                     >
                         Sign up
                     </button>
@@ -150,7 +169,7 @@ function Signup() {
                 <p className="text-center text-gray-600">
                     Have an account?{" "}
                     <Link
-                        to="/user/login"
+                        to="/login"
                         className="text-blue-600 hover:underline font-medium"
                     >
                         Log in
@@ -162,4 +181,3 @@ function Signup() {
 }
 
 export default Signup;
-// D:\Web_Dev\backends\airbnb-clone frontend\src\components\user\Signup.jsx
