@@ -23,6 +23,7 @@ function Signup() {
 
     const onSubmit = async (data) => {
         try {
+            setIsLoading(true); // Disable button while processing
             await dispatch(signup(data)).unwrap();
             reset();
 

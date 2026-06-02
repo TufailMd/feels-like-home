@@ -9,6 +9,7 @@ import { addReview, deleteReview } from "../features/review/reviewThunks";
 import { getListing } from "../features/listing/listingThunks";
 import { resetCurrListing } from "../features/listing/listingSlice";
 import PageLoader from "./utils/PageLoader";
+import { motion, AnimatePresence } from "framer-motion";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAP_TOKEN;
 
