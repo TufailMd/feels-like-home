@@ -172,7 +172,7 @@ function Listing() {
                         <p className="mb-3">{currListing.country}</p>
                     </div>
 
-                    {!authLoading && isOwner && (
+                    {isOwner && (
                         <div className="my-4 mb-6">
                             <button
                                 className="px-5 py-2 bg-blue-500 text-white rounded-lg mr-4 hover:bg-blue-600 cursor-pointer"
