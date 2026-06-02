@@ -172,25 +172,25 @@ function Listing() {
                         <p className="mb-3">{currListing.country}</p>
                     </div>
 
-                    {isOwner && (
-                        <div className="my-4 mb-6">
-                            <button
-                                className="px-5 py-2 bg-blue-500 text-white rounded-lg mr-4 hover:bg-blue-600 cursor-pointer"
-                                onClick={() => handleModificationRequest(`/listings/${currListing._id}/edit`)}
-                            >
-                                Edit
-                            </button>
+                    {/* {isOwner && ( */}
+                    <div className="my-4 mb-6">
+                        <button
+                            className="px-5 py-2 bg-blue-500 text-white rounded-lg mr-4 hover:bg-blue-600 cursor-pointer"
+                            onClick={() => handleModificationRequest(`/listings/${currListing._id}/edit`)}
+                        >
+                            Edit
+                        </button>
 
-                            <button
-                                className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
-                                onClick={() => handleModificationRequest(`/listings/${currListing._id}/delete`)}
-                            >
-                                Delete
-                            </button>
+                        <button
+                            className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
+                            onClick={() => handleModificationRequest(`/listings/${currListing._id}/delete`)}
+                        >
+                            Delete
+                        </button>
 
 
-                        </div>
-                    )}
+                    </div>
+                    {/* )} */}
 
                     <hr />
 
