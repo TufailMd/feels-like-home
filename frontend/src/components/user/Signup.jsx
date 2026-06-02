@@ -3,9 +3,13 @@ import { useDispatch } from "react-redux"
 import { signup } from "../../features/user/userThunks";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 
 function Signup() {
+    const [message, setMessage] = useState(null);
+    const [type, setType] = useState("");
+
     const dispatch = useDispatch();
     const {
         register,
@@ -16,20 +20,42 @@ function Signup() {
     const navigate = useNavigate();
 
     const onSubmit = async (data) => {
-        console.log(data);
         try {
             await dispatch(signup(data)).unwrap();
             reset();
-            navigate("/")
+
+            setType("success");
+            setMessage("Signup successful! Redirecting...");
+
+            setTimeout(() => {
+                navigate("/login");
+            }, 1500);
         } catch (err) {
             console.log(err);
+
+            setType("error");
+            setMessage(err?.response?.data?.error || "Signup failed");
         }
+        setTimeout(() => {
+            setMessage(null);
+        }, 3000);
     };
 
     return (
         <div className="my-20 flex items-center justify-center px-4">
             <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6">
                 <h1 className="text-2xl font-semibold text-center mb-6">Sign Up</h1>
+                {message && (
+                    <div
+                        className={`mb-4 px-4 py-2 rounded-lg text-sm font-medium
+        ${type === "success"
+                                ? "bg-green-100 text-green-700 border border-green-300"
+                                : "bg-red-100 text-red-700 border border-red-300"
+                            }`}
+                    >
+                        {message}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
                     {/* Email */}

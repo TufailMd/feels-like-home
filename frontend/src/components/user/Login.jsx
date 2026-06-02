@@ -2,8 +2,11 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { login } from "../../features/user/userThunks";
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 function Login() {
+    const [message, setMessage] = useState(null);
+    const [type, setType] = useState("");
     const {
         register,
         handleSubmit, reset,
@@ -17,18 +20,40 @@ function Login() {
         try {
             await dispatch(login(data)).unwrap();
             reset();
-            navigate("/");
+
+            setType("success");
+            setMessage("Login successful!");
+
+            setTimeout(() => {
+                navigate("/");
+            }, 1000);
+
         } catch (error) {
             console.log(error);
-            alert("Login failed");
+
+            setType("error");
+            setMessage(error?.response?.data?.error || "Login failed");
         }
+        setTimeout(() => {
+            setMessage(null);
+        }, 3000);
     };
 
     return (
         <div className="my-20 flex items-center justify-center px-4">
             <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6">
                 <h1 className="text-2xl font-semibold text-center mb-6">Login</h1>
-
+                {message && (
+                    <div
+                        className={`mb-4 px-4 py-2 rounded-lg text-sm font-medium
+        ${type === "success"
+                                ? "bg-green-100 text-green-700 border border-green-300"
+                                : "bg-red-100 text-red-700 border border-red-300"
+                            }`}
+                    >
+                        {message}
+                    </div>
+                )}
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
                     <div className="mb-4">
                         <label className="block text-gray-700 mb-1">Username</label>
